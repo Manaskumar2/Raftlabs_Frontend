@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useSocket } from "@/hooks/useSocket";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const ORDER_STATUSES = [
@@ -34,6 +34,7 @@ export default function OrderDetailsPage() {
   const orderId = params.id as string;
   const queryClient = useQueryClient();
   const { socket, isConnected } = useSocket();
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const { data: order, isLoading } = useQuery({
     queryKey: ["order", orderId],
@@ -71,6 +72,22 @@ export default function OrderDetailsPage() {
     };
   }, [socket, isConnected, orderId, queryClient]);
 
+  const handleCancelOrder = async () => {
+    if (!order || !confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+    
+    try {
+      setIsCancelling(true);
+      await ordersService.cancelOrder(order.id, order.phoneNumber);
+      toast.success("Order cancelled successfully");
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+    } catch (error) {
+      toast.error("Failed to cancel order. It might be too late.");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-[70vh] items-center justify-center">
@@ -92,6 +109,7 @@ export default function OrderDetailsPage() {
 
   const currentStatusIndex = ORDER_STATUSES.indexOf(order.status);
   const isCancelled = order.status === "CANCELLED";
+  const canCancel = order.status === "ORDER_RECEIVED" || order.status === "PREPARING";
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -101,12 +119,22 @@ export default function OrderDetailsPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-bold tracking-tight">Order #{order.id.slice(0, 8)}</h1>
           <p className="text-muted-foreground mt-1">
             Placed on {format(new Date(order.createdAt), "MMM dd, yyyy h:mm a")}
           </p>
         </div>
+        {canCancel && (
+          <Button 
+            variant="destructive" 
+            onClick={handleCancelOrder} 
+            disabled={isCancelling}
+          >
+            {isCancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
+            Cancel Order
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
