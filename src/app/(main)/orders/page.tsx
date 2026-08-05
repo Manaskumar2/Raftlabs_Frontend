@@ -146,7 +146,8 @@ export default function OrdersPage() {
                 <p className="text-muted-foreground">No orders found for this phone number.</p>
               </div>
             ) : (
-              <div className="rounded-md border">
+              <>
+                <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -227,7 +228,7 @@ export default function OrdersPage() {
                   </div>
                 </div>
               )}
-            </div>
+              </>
             )}
           </CardContent>
         </Card>
