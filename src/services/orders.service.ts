@@ -37,17 +37,31 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface PaginatedOrders {
+  data: Order[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export const ordersService = {
   createOrder: async (data: CreateOrderPayload): Promise<Order> => {
     const response = await api.post("/orders", data);
     return response.data;
   },
   
-  getOrders: async (phoneNumber?: string): Promise<Order[]> => {
-    const params = phoneNumber ? { phoneNumber } : {};
+  getOrders: async (phoneNumber?: string, page: number = 1, limit: number = 10): Promise<PaginatedOrders> => {
+    const params: any = { page, limit };
+    if (phoneNumber) params.phoneNumber = phoneNumber;
     const response = await api.get("/orders", { params });
-    // The backend paginated endpoint returns { data: [...], meta: {...} }
-    return response.data.data || response.data;
+    // If backend isn't paginated yet, wrap the array in PaginatedOrders for safety
+    if (Array.isArray(response.data)) {
+      return { data: response.data, meta: { page: 1, limit: 10, total: response.data.length, totalPages: 1 } };
+    }
+    return response.data;
   },
   
   getOrderById: async (id: string): Promise<Order> => {

@@ -28,19 +28,24 @@ export default function OrdersPage() {
   const [phoneNumberInput, setPhoneNumberInput] = useState("");
   const [submittedPhoneNumber, setSubmittedPhoneNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<"createdAt" | "totalAmount">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ["orders", submittedPhoneNumber],
-    queryFn: () => ordersService.getOrders(submittedPhoneNumber),
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["orders", submittedPhoneNumber, page],
+    queryFn: () => ordersService.getOrders(submittedPhoneNumber, page, 10),
     enabled: !!submittedPhoneNumber,
   });
+
+  const orders = response?.data || [];
+  const meta = response?.meta;
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phoneNumberInput.trim()) {
       setSubmittedPhoneNumber(phoneNumberInput.trim());
+      setPage(1);
     }
   };
 
@@ -186,6 +191,36 @@ export default function OrdersPage() {
                   </TableBody>
                 </Table>
               </div>
+              
+              {meta && meta.totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6">
+                  <div className="text-sm text-muted-foreground hidden sm:block">
+                    Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} orders
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={meta.page <= 1}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm font-medium mx-2">
+                      Page {meta.page} of {meta.totalPages}
+                    </span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
+                      disabled={meta.page >= meta.totalPages}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
             )}
           </CardContent>
         </Card>
