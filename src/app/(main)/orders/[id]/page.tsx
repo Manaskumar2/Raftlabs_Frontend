@@ -155,13 +155,14 @@ export default function OrderDetailsPage() {
                 </div>
               ) : (
                 <div className="relative pt-8 pb-4">
-                  <div className="absolute top-12 left-8 right-8 h-1 bg-muted rounded-full" />
-                  
-                  <div className="absolute top-12 left-8 h-1 bg-primary rounded-full transition-all duration-500" 
-                    style={{ 
-                      width: currentStatusIndex >= 0 ? `${(currentStatusIndex / (ORDER_STATUSES.length - 1)) * 100}%` : "0%" 
-                    }} 
-                  />
+                  <div className="absolute top-12 left-8 right-8 h-1 bg-muted rounded-full">
+                    <div 
+                      className="h-full bg-primary rounded-full transition-all duration-500" 
+                      style={{ 
+                        width: currentStatusIndex >= 0 ? `${(currentStatusIndex / (ORDER_STATUSES.length - 1)) * 100}%` : "0%" 
+                      }} 
+                    />
+                  </div>
 
                   <div className="relative flex justify-between">
                     {ORDER_STATUSES.map((status, index) => {
