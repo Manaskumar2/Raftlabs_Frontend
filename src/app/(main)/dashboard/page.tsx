@@ -20,10 +20,11 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
-  const { data: orders, isLoading } = useQuery({
+  const { data: response, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: () => ordersService.getOrders(),
   });
+  const orders = response?.data || [];
 
   if (isLoading) {
     return (
