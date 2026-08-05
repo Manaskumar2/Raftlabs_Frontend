@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ordersService } from "@/services/orders.service";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2, Eye, ArrowUpDown, Phone } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { formatOrderId } from "@/lib/utils";
 
 const statusColors: Record<string, string> = {
   ORDER_RECEIVED: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
@@ -28,13 +29,22 @@ export default function OrdersPage() {
   const [phoneNumberInput, setPhoneNumberInput] = useState("");
   const [submittedPhoneNumber, setSubmittedPhoneNumber] = useState("");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<"createdAt" | "totalAmount">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
+
   const { data: response, isLoading } = useQuery({
-    queryKey: ["orders", submittedPhoneNumber, page],
-    queryFn: () => ordersService.getOrders(submittedPhoneNumber, page, 10),
+    queryKey: ["orders", submittedPhoneNumber, page, debouncedSearch],
+    queryFn: () => ordersService.getOrders(submittedPhoneNumber, page, 10, debouncedSearch),
     enabled: !!submittedPhoneNumber,
   });
 
@@ -58,10 +68,7 @@ export default function OrdersPage() {
     }
   };
 
-  const filteredOrders = orders?.filter((order) => 
-    order.id.toLowerCase().includes(search.toLowerCase()) || 
-    order.customerName.toLowerCase().includes(search.toLowerCase())
-  ).sort((a, b) => {
+  const sortedOrders = [...orders].sort((a, b) => {
     if (sortField === "createdAt") {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
@@ -134,7 +141,7 @@ export default function OrdersPage() {
               <div className="flex h-40 items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            ) : !filteredOrders?.length ? (
+            ) : !sortedOrders.length ? (
               <div className="text-center py-10">
                 <p className="text-muted-foreground">No orders found for this phone number.</p>
               </div>
@@ -166,10 +173,10 @@ export default function OrdersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredOrders.map((order) => (
+                    {sortedOrders.map((order) => (
                       <TableRow key={order.id}>
                         <TableCell className="font-medium text-xs md:text-sm">
-                          {order.id.slice(0, 8)}...
+                          #{formatOrderId(order.id)}
                         </TableCell>
                         <TableCell>{order.customerName}</TableCell>
                         <TableCell>{format(new Date(order.createdAt), "MMM dd, yyyy h:mm a")}</TableCell>

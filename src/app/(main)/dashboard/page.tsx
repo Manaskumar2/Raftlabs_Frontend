@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatOrderId } from "@/lib/utils";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 
@@ -100,7 +102,7 @@ export default function DashboardPage() {
                     <div>
                       <p className="font-semibold">{order.customerName}</p>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(order.createdAt), "MMM dd, yyyy")} &bull; #{order.id.slice(0, 8)}
+                        {format(new Date(order.createdAt), "MMM dd, yyyy")} &bull; #{formatOrderId(order.id)}
                       </p>
                     </div>
                   </div>

@@ -53,9 +53,10 @@ export const ordersService = {
     return response.data;
   },
   
-  getOrders: async (phoneNumber?: string, page: number = 1, limit: number = 10): Promise<PaginatedOrders> => {
+  getOrders: async (phoneNumber?: string, page: number = 1, limit: number = 10, search?: string): Promise<PaginatedOrders> => {
     const params: any = { page, limit };
     if (phoneNumber) params.phoneNumber = phoneNumber;
+    if (search) params.search = search;
     const response = await api.get("/orders", { params });
     // If backend isn't paginated yet, wrap the array in PaginatedOrders for safety
     if (Array.isArray(response.data)) {

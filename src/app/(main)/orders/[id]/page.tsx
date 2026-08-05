@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { useSocket } from "@/hooks/useSocket";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { formatOrderId } from "@/lib/utils";
 
 const ORDER_STATUSES = [
   "ORDER_RECEIVED",
@@ -120,7 +121,7 @@ export default function OrderDetailsPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold tracking-tight">Order #{order.id.slice(0, 8)}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Order #{formatOrderId(order.id)}</h1>
           <p className="text-muted-foreground mt-1">
             Placed on {format(new Date(order.createdAt), "MMM dd, yyyy h:mm a")}
           </p>
