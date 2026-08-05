@@ -21,8 +21,8 @@ import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
   const { data: response, isLoading } = useQuery({
-    queryKey: ["orders"],
-    queryFn: () => ordersService.getOrders(),
+    queryKey: ["orders", "dashboard"],
+    queryFn: () => ordersService.getOrders(undefined, 1, 1000),
   });
   const orders = response?.data || [];
 
