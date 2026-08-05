@@ -138,9 +138,10 @@ export default function OrderDetailsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+        {/* Row 1: Status & Delivery */}
+        <div className="lg:col-span-2">
           {/* Timeline Tracking */}
-          <Card className="border-border/50 shadow-sm overflow-hidden">
+          <Card className="h-full border-border/50 shadow-sm overflow-hidden">
             <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Order Status {isConnected ? <Badge variant="outline" className="ml-2 bg-green-500/10 text-green-500 border-green-500/20">Live Sync On</Badge> : null}</CardTitle>
             </CardHeader>
@@ -189,9 +190,35 @@ export default function OrderDetailsPage() {
               )}
             </CardContent>
           </Card>
+        </div>
 
+        <div className="lg:col-span-1">
+          {/* Customer Details */}
+          <Card className="h-full border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle>Delivery Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <div>
+                <p className="text-muted-foreground mb-1">Customer</p>
+                <p className="font-medium">{order.customerName}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Contact</p>
+                <p className="font-medium">{order.phoneNumber}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground mb-1">Address</p>
+                <p className="font-medium">{order.deliveryAddress}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 2: Items & Payment */}
+        <div className="lg:col-span-2">
           {/* Order Items */}
-          <Card className="border-border/50 shadow-sm">
+          <Card className="h-full border-border/50 shadow-sm">
             <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Items Ordered</CardTitle>
             </CardHeader>
@@ -222,30 +249,9 @@ export default function OrderDetailsPage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
-          {/* Customer Details */}
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader>
-              <CardTitle>Delivery Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div>
-                <p className="text-muted-foreground mb-1">Customer</p>
-                <p className="font-medium">{order.customerName}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Contact</p>
-                <p className="font-medium">{order.phoneNumber}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Address</p>
-                <p className="font-medium">{order.deliveryAddress}</p>
-              </div>
-            </CardContent>
-          </Card>
-
+        <div className="lg:col-span-1">
           {/* Payment Summary */}
-          <Card className="border-border/50 shadow-sm">
+          <Card className="h-full border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle>Payment Summary</CardTitle>
             </CardHeader>
