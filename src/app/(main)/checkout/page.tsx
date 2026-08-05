@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -42,9 +42,12 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
   });
 
+  const isOrderPlaced = useRef(false);
+
   const mutation = useMutation({
     mutationFn: ordersService.createOrder,
     onSuccess: (order) => {
+      isOrderPlaced.current = true;
       clearCart();
       toast.success("Order placed successfully!");
       router.push(`/orders/${order.id}`);
@@ -55,11 +58,11 @@ export default function CheckoutPage() {
   });
 
   useEffect(() => {
-    if (items.length === 0 && !mutation.isSuccess) {
+    if (items.length === 0 && !isOrderPlaced.current) {
       toast.info("Your cart is empty");
       router.push("/menu");
     }
-  }, [items, router, mutation.isSuccess]);
+  }, [items, router]);
 
   const onSubmit = (values: CheckoutFormValues) => {
     if (items.length === 0) return;
@@ -74,7 +77,7 @@ export default function CheckoutPage() {
     });
   };
 
-  if (items.length === 0 && !mutation.isSuccess) {
+  if (items.length === 0 && !isOrderPlaced.current) {
     return null; // Handle by useEffect redirect
   }
 

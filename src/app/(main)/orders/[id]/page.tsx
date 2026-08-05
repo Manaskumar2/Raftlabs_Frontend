@@ -78,7 +78,7 @@ export default function OrderDetailsPage() {
     try {
       setIsCancelling(true);
       await ordersService.cancelOrder(order.id, order.phoneNumber);
-      toast.success("Order cancelled successfully");
+      // Success toast is handled automatically by the WebSocket order.status.updated event
       queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
     } catch (error) {
