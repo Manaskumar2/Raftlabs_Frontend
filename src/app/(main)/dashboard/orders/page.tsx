@@ -109,9 +109,9 @@ export default function AdminOrdersPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
+              <div className="rounded-md border max-h-[calc(100vh-240px)] overflow-y-auto">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                   <TableRow>
                     <TableHead>Order ID</TableHead>
                     <TableHead>Customer</TableHead>
