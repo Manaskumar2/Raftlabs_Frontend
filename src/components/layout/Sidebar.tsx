@@ -3,23 +3,27 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Utensils, ClipboardList } from "lucide-react";
+import { LayoutDashboard, ClipboardList } from "lucide-react";
 
 const sidebarItems = [
   {
-    title: "Menu",
-    href: "/menu",
-    icon: Utensils,
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
   },
   {
-    title: "Orders",
-    href: "/orders",
+    title: "Manage Orders",
+    href: "/dashboard/orders",
     icon: ClipboardList,
   },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+
+  if (!pathname.startsWith("/dashboard")) {
+    return null;
+  }
 
   return (
     <aside className="hidden md:flex w-64 flex-col border-r border-border/50 bg-background/40 backdrop-blur-md pt-6 relative h-full">
