@@ -158,7 +158,7 @@ export default function AdminOrderDetailsPage() {
             </CardContent>
           </Card>
 
-          <Card className="h-full border-border/50 shadow-sm overflow-hidden">
+          <Card className="border-border/50 shadow-sm overflow-hidden">
             <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Timeline {isConnected ? <Badge variant="outline" className="ml-2 bg-green-500/10 text-green-500 border-green-500/20">Live Sync On</Badge> : null}</CardTitle>
             </CardHeader>
@@ -205,7 +205,7 @@ export default function AdminOrderDetailsPage() {
             </CardContent>
           </Card>
           
-          <Card className="h-full border-border/50 shadow-sm">
+          <Card className="border-border/50 shadow-sm">
             <CardHeader className="bg-muted/50 border-b">
               <CardTitle>Items Ordered</CardTitle>
             </CardHeader>
@@ -237,7 +237,7 @@ export default function AdminOrderDetailsPage() {
         </div>
 
         <div className="lg:col-span-1 space-y-6">
-          <Card className="h-full border-border/50 shadow-sm">
+          <Card className="border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle>Delivery Details</CardTitle>
             </CardHeader>
@@ -257,7 +257,7 @@ export default function AdminOrderDetailsPage() {
             </CardContent>
           </Card>
 
-          <Card className="h-full border-border/50 shadow-sm">
+          <Card className="border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle>Payment Summary</CardTitle>
             </CardHeader>
