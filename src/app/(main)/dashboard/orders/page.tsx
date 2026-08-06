@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ordersService } from "@/services/orders.service";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,35 +28,38 @@ const formatStatus = (status: string) => {
 export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<"createdAt" | "totalAmount">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-
-  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1);
     }, 500);
     return () => clearTimeout(handler);
   }, [search]);
-
-  // Scroll to top when page changes
-  useEffect(() => {
-    if (tableContainerRef.current) {
-      tableContainerRef.current.scrollTop = 0;
-    }
-  }, [page]);
-
-  // Pass undefined for phoneNumber to get ALL orders
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["orders", "admin", page, debouncedSearch],
-    queryFn: () => ordersService.getOrders(undefined, page, 10, debouncedSearch),
+  const { data: response, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["orders", "admin", debouncedSearch],
+    queryFn: ({ pageParam = 1 }) => ordersService.getOrders(undefined, pageParam, 10, debouncedSearch),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.meta) return undefined;
+      return lastPage.meta.page < lastPage.meta.totalPages ? lastPage.meta.page + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  const orders = response?.data || [];
-  const meta = response?.meta;
+  const orders = response?.pages.flatMap((page) => page.data || []) || [];
+  
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastOrderElementRef = useCallback((node: HTMLTableRowElement | null) => {
+    if (isLoading || isFetchingNextPage) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const toggleSort = (field: "createdAt" | "totalAmount") => {
     if (sortField === field) {
@@ -144,8 +147,10 @@ export default function AdminOrdersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedOrders.map((order) => (
-                    <TableRow key={order.id}>
+                  {sortedOrders.map((order, index) => {
+                    const isLast = index === sortedOrders.length - 1;
+                    return (
+                    <TableRow key={order.id} ref={isLast ? lastOrderElementRef : null}>
                       <TableCell className="font-medium text-xs md:text-sm">
                         #{formatOrderId(order.id)}
                       </TableCell>
@@ -165,37 +170,14 @@ export default function AdminOrdersPage() {
                         </Link>
                       </TableCell>
                     </TableRow>
-                  ))}
+                    );
+                  })}
                 </TableBody>
               </Table>
-            </div>
             
-            {meta && (
-              <div className="flex-none flex items-center justify-between mt-6">
-                <div className="text-sm text-muted-foreground hidden sm:block">
-                  Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} orders
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={meta.page <= 1}
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm font-medium mx-2">
-                    Page {meta.page} of {meta.totalPages}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-                    disabled={meta.page >= meta.totalPages}
-                  >
-                    Next
-                  </Button>
-                </div>
+            {isFetchingNextPage && (
+              <div className="flex justify-center p-4">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             )}
             </>
