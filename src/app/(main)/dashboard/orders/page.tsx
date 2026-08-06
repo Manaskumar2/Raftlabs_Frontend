@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { ordersService } from "@/services/orders.service";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -32,6 +32,8 @@ export default function AdminOrdersPage() {
   const [sortField, setSortField] = useState<"createdAt" | "totalAmount">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -39,6 +41,13 @@ export default function AdminOrdersPage() {
     }, 500);
     return () => clearTimeout(handler);
   }, [search]);
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTop = 0;
+    }
+  }, [page]);
 
   // Pass undefined for phoneNumber to get ALL orders
   const { data: response, isLoading } = useQuery({
@@ -108,7 +117,7 @@ export default function AdminOrdersPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border flex-1 overflow-y-auto min-h-[500px]">
+              <div ref={tableContainerRef} className="rounded-md border flex-1 overflow-y-auto min-h-[500px]">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                   <TableRow>
