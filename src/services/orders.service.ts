@@ -74,4 +74,9 @@ export const ordersService = {
     const response = await api.delete(`/orders/${id}`, { params: { phoneNumber } });
     return response.data;
   },
+
+  updateOrderStatus: async (id: string, status: string): Promise<Order> => {
+    const response = await api.patch(`/orders/${id}/status`, { status });
+    return response.data;
+  },
 };

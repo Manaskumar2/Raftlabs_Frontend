@@ -85,7 +85,7 @@ export default function DashboardPage() {
             <CardTitle>Recent Orders</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">Your 5 most recent orders</p>
           </div>
-          <Link href="/orders">
+          <Link href="/dashboard/orders">
             <Button variant="outline" size="sm">View All</Button>
           </Link>
         </CardHeader>
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                     <Badge variant="outline" className="capitalize">
                       {order.status.replace(/_/g, " ").toLowerCase()}
                     </Badge>
-                    <Link href={`/orders/${order.id}`}>
+                    <Link href={`/dashboard/orders/${order.id}`}>
                       <Button variant="ghost" size="sm">Details</Button>
                     </Link>
                   </div>
