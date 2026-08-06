@@ -200,7 +200,7 @@ export default function OrdersPage() {
                 </Table>
               </div>
               
-              {meta && meta.totalPages > 1 && (
+              {meta && (
                 <div className="flex items-center justify-between mt-6">
                   <div className="text-sm text-muted-foreground hidden sm:block">
                     Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} orders
