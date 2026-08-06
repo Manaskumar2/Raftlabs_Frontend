@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { menuService } from "@/services/menu.service";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cart.store";
@@ -46,7 +46,7 @@ export default function MenuPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddToCart = (item: any) => {
+  const handleAddToCart = (item: { id: string, name: string, price: string, imageUrl: string, description: string }) => {
     addItem({
       id: item.id,
       menuItemId: item.id,

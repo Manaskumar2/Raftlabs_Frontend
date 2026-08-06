@@ -54,7 +54,7 @@ export const ordersService = {
   },
   
   getOrders: async (phoneNumber?: string, page: number = 1, limit: number = 10, search?: string): Promise<PaginatedOrders> => {
-    const params: any = { page, limit };
+    const params: Record<string, string | number> = { page, limit };
     if (phoneNumber) params.phoneNumber = phoneNumber;
     if (search) params.search = search;
     const response = await api.get("/orders", { params });

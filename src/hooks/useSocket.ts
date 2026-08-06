@@ -15,6 +15,7 @@ export const useSocket = () => {
     const socketInstance = io(SOCKET_URL);
 
     socketRef.current = socketInstance;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSocket(socketInstance);
 
     socketInstance.on("connect", () => {

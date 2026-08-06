@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name must be at least 2 characters").max(100),
@@ -42,27 +42,28 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
   });
 
-  const isOrderPlaced = useRef(false);
+
 
   const mutation = useMutation({
     mutationFn: ordersService.createOrder,
     onSuccess: (order) => {
-      isOrderPlaced.current = true;
+
       clearCart();
       toast.success("Order placed successfully!");
       router.push(`/orders/${order.id}`);
     },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to place order");
+    onError: (error: Record<string, unknown>) => {
+      const err = error as Record<string, any>;
+      toast.error(err.response?.data?.message || "Failed to place order");
     },
   });
 
   useEffect(() => {
-    if (items.length === 0 && !isOrderPlaced.current) {
+    if (items.length === 0 && !mutation.isSuccess) {
       toast.info("Your cart is empty");
       router.push("/menu");
     }
-  }, [items, router]);
+  }, [items, router, mutation.isSuccess]);
 
   const onSubmit = (values: CheckoutFormValues) => {
     if (items.length === 0) return;
@@ -77,7 +78,7 @@ export default function CheckoutPage() {
     });
   };
 
-  if (items.length === 0 && !isOrderPlaced.current) {
+  if (items.length === 0 && !mutation.isSuccess) {
     return null; // Handle by useEffect redirect
   }
 

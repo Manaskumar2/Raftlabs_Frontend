@@ -26,7 +26,6 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] sm:w-[320px] bg-background/95 backdrop-blur-xl border-r-border/50">
               <nav className="flex flex-col gap-6 mt-12">
-                <Link href="/dashboard" className="text-xl font-medium hover:text-primary transition-colors">Dashboard</Link>
                 <Link href="/menu" className="text-xl font-medium hover:text-primary transition-colors">Menu</Link>
                 <Link href="/orders" className="text-xl font-medium hover:text-primary transition-colors">My Orders</Link>
               </nav>

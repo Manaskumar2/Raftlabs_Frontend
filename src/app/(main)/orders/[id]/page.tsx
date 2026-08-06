@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ordersService } from "@/services/orders.service";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Package, Clock, Truck, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
@@ -53,7 +53,7 @@ export default function OrderDetailsPage() {
         toast.info(`Order status updated to ${data.status.replace(/_/g, " ")}`);
         
         // Optimistic update
-        queryClient.setQueryData(["order", orderId], (oldData: any) => {
+        queryClient.setQueryData(["order", orderId], (oldData: unknown) => {
           if (!oldData) return oldData;
           return {
             ...oldData,
@@ -82,7 +82,7 @@ export default function OrderDetailsPage() {
       // Success toast is handled automatically by the WebSocket order.status.updated event
       queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-    } catch (error) {
+    } catch {
       toast.error("Failed to cancel order. It might be too late.");
     } finally {
       setIsCancelling(false);

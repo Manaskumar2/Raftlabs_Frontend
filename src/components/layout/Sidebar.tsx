@@ -3,14 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Utensils, ClipboardList } from "lucide-react";
+import { Utensils, ClipboardList } from "lucide-react";
 
 const sidebarItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
   {
     title: "Menu",
     href: "/menu",
