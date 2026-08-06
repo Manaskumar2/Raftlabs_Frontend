@@ -71,8 +71,8 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="flex flex-col h-[calc(100vh-8rem)] space-y-6">
+      <div className="flex-none flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -96,9 +96,8 @@ export default function AdminOrdersPage() {
         </div>
       </div>
 
-      <Card className="border-border/50 shadow-sm">
-
-        <CardContent className="pt-6">
+      <Card className="border-border/50 shadow-sm flex-1 flex flex-col min-h-0">
+        <CardContent className="pt-6 flex-1 flex flex-col min-h-0">
           {isLoading ? (
             <div className="flex h-40 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -109,7 +108,7 @@ export default function AdminOrdersPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border max-h-[calc(100vh-240px)] overflow-y-auto">
+              <div className="rounded-md border flex-1 overflow-y-auto min-h-0">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                   <TableRow>
@@ -163,7 +162,7 @@ export default function AdminOrdersPage() {
             </div>
             
             {meta && (
-              <div className="flex items-center justify-between mt-6">
+              <div className="flex-none flex items-center justify-between mt-6">
                 <div className="text-sm text-muted-foreground hidden sm:block">
                   Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} orders
                 </div>
