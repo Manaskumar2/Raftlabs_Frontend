@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { ordersService } from "@/services/orders.service";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -30,32 +30,45 @@ export default function OrdersPage() {
   const [submittedPhoneNumber, setSubmittedPhoneNumber] = useState("");
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [page, setPage] = useState(1);
   const [sortField, setSortField] = useState<"createdAt" | "totalAmount">("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1);
     }, 500);
     return () => clearTimeout(handler);
   }, [search]);
 
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["orders", submittedPhoneNumber, page, debouncedSearch],
-    queryFn: () => ordersService.getOrders(submittedPhoneNumber, page, 10, debouncedSearch),
+  const { data: response, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    queryKey: ["orders", submittedPhoneNumber, debouncedSearch],
+    queryFn: ({ pageParam = 1 }) => ordersService.getOrders(submittedPhoneNumber, pageParam, 10, debouncedSearch),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.meta) return undefined;
+      return lastPage.meta.page < lastPage.meta.totalPages ? lastPage.meta.page + 1 : undefined;
+    },
+    initialPageParam: 1,
     enabled: !!submittedPhoneNumber,
   });
 
-  const orders = response?.data || [];
-  const meta = response?.meta;
+  const orders = response?.pages.flatMap((page) => page.data || []) || [];
+  
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastOrderElementRef = useCallback((node: HTMLTableRowElement | null) => {
+    if (isLoading || isFetchingNextPage) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const handlePhoneSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (phoneNumberInput.trim()) {
       setSubmittedPhoneNumber(phoneNumberInput.trim());
-      setPage(1);
     }
   };
 
@@ -147,9 +160,9 @@ export default function OrdersPage() {
               </div>
             ) : (
               <>
-                <div className="rounded-md border">
+                <div className="rounded-md border max-h-[calc(100vh-320px)] overflow-y-auto min-h-[400px]">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                     <TableRow>
                       <TableHead>Order ID</TableHead>
                       <TableHead>Customer</TableHead>
@@ -174,11 +187,13 @@ export default function OrdersPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium text-xs md:text-sm">
-                          #{formatOrderId(order.id)}
-                        </TableCell>
+                    {sortedOrders.map((order, index) => {
+                      const isLast = index === sortedOrders.length - 1;
+                      return (
+                        <TableRow key={order.id} ref={isLast ? lastOrderElementRef : null}>
+                          <TableCell className="font-medium text-xs md:text-sm">
+                            #{formatOrderId(order.id)}
+                          </TableCell>
                         <TableCell>{order.customerName}</TableCell>
                         <TableCell>{format(new Date(order.createdAt), "MMM dd, yyyy h:mm a")}</TableCell>
                         <TableCell>${parseFloat(order.totalAmount).toFixed(2)}</TableCell>
@@ -194,38 +209,16 @@ export default function OrdersPage() {
                             </Button>
                           </Link>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
               
-              {meta && (
-                <div className="flex items-center justify-between mt-6">
-                  <div className="text-sm text-muted-foreground hidden sm:block">
-                    Showing {((meta.page - 1) * meta.limit) + 1} to {Math.min(meta.page * meta.limit, meta.total)} of {meta.total} orders
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={meta.page <= 1}
-                    >
-                      Previous
-                    </Button>
-                    <span className="text-sm font-medium mx-2">
-                      Page {meta.page} of {meta.totalPages}
-                    </span>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-                      disabled={meta.page >= meta.totalPages}
-                    >
-                      Next
-                    </Button>
-                  </div>
+              {isFetchingNextPage && (
+                <div className="flex justify-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
               )}
               </>
