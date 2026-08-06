@@ -120,7 +120,7 @@ export default function AdminOrdersPage() {
             </div>
           ) : (
             <>
-              <div ref={tableContainerRef} className="rounded-md border flex-1 overflow-y-auto min-h-[500px]">
+              <div className="rounded-md border flex-1 overflow-y-auto min-h-[500px]">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                   <TableRow>
@@ -174,6 +174,7 @@ export default function AdminOrdersPage() {
                   })}
                 </TableBody>
               </Table>
+              </div>
             
             {isFetchingNextPage && (
               <div className="flex justify-center p-4">
