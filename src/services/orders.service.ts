@@ -70,7 +70,7 @@ export const ordersService = {
     return response.data;
   },
 
-  cancelOrder: async (id: string, phoneNumber: string): Promise<Order> => {
+  cancelOrder: async (id: string, phoneNumber?: string): Promise<Order> => {
     const response = await api.delete(`/orders/${id}`, { params: { phoneNumber } });
     return response.data;
   },

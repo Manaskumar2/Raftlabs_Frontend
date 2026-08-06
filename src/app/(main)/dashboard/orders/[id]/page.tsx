@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useSocket } from "@/hooks/useSocket";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { formatOrderId } from "@/lib/utils";
 
@@ -42,17 +42,23 @@ export default function AdminOrderDetailsPage() {
     enabled: !!orderId,
   });
 
-  const updateStatusMutation = useMutation({
-    mutationFn: (newStatus: string) => ordersService.updateOrderStatus(orderId, newStatus),
-    onSuccess: (updatedOrder) => {
-      toast.success(`Order status updated to ${updatedOrder.status.replace(/_/g, " ")}`);
-      queryClient.setQueryData(["order", orderId], updatedOrder);
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleCancelOrder = async () => {
+    if (!order || !confirm("Are you sure you want to cancel this order? This action cannot be undone.")) return;
+    
+    try {
+      setIsCancelling(true);
+      await ordersService.cancelOrder(order.id);
+      // Success toast is handled automatically by the WebSocket order.status.updated event
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
-    onError: () => {
-      toast.error("Failed to update order status");
+    } catch {
+      toast.error("Failed to cancel order.");
+    } finally {
+      setIsCancelling(false);
     }
-  });
+  };
 
   useEffect(() => {
     if (!socket || !isConnected || !orderId) return;
@@ -102,6 +108,7 @@ export default function AdminOrderDetailsPage() {
 
   const currentStatusIndex = ORDER_STATUSES.indexOf(order.status);
   const isCancelled = order.status === "CANCELLED";
+  const canCancel = order.status === "ORDER_RECEIVED" || order.status === "PREPARING";
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -117,46 +124,20 @@ export default function AdminOrderDetailsPage() {
             Placed on {format(new Date(order.createdAt), "MMM dd, yyyy h:mm a")}
           </p>
         </div>
+        {canCancel && (
+          <Button 
+            variant="destructive" 
+            onClick={handleCancelOrder} 
+            disabled={isCancelling}
+          >
+            {isCancelling ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
+            Cancel Order
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-border/50 shadow-sm">
-            <CardHeader className="bg-muted/50 border-b">
-              <CardTitle>Manage Status</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              {isCancelled ? (
-                <div className="text-destructive font-semibold flex items-center gap-2">
-                  <XCircle className="h-5 w-5" /> Order Cancelled
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-3">
-                  {ORDER_STATUSES.map((status) => (
-                    <Button
-                      key={status}
-                      variant={order.status === status ? "default" : "outline"}
-                      onClick={() => updateStatusMutation.mutate(status)}
-                      disabled={updateStatusMutation.isPending || order.status === status}
-                    >
-                      {status.replace(/_/g, " ")}
-                    </Button>
-                  ))}
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      if(confirm("Are you sure you want to cancel this order?")) {
-                         updateStatusMutation.mutate("CANCELLED");
-                      }
-                    }}
-                    disabled={updateStatusMutation.isPending}
-                  >
-                    Cancel Order
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
 
           <Card className="border-border/50 shadow-sm overflow-hidden">
             <CardHeader className="bg-muted/50 border-b">
