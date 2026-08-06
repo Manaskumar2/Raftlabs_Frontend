@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
   });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] space-y-6">
+    <div className="flex flex-col min-h-[calc(100vh-8rem)] space-y-6">
       <div className="flex-none flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
@@ -108,7 +108,7 @@ export default function AdminOrdersPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border flex-1 overflow-y-auto min-h-0">
+              <div className="rounded-md border flex-1 overflow-y-auto min-h-[500px]">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                   <TableRow>
