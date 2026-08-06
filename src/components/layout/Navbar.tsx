@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCartStore } from "@/store/cart.store";
 import { ShoppingCart, MenuIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { Moon, Sun } from "lucide-react";
 export function Navbar() {
   const totalItems = useCartStore((state) => state.getTotalItems());
   const { setTheme, theme } = useTheme();
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith("/dashboard");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm transition-all">
@@ -26,8 +29,15 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] sm:w-[320px] bg-background/95 backdrop-blur-xl border-r-border/50">
               <nav className="flex flex-col gap-6 mt-12">
-                <Link href="/menu" className="text-xl font-medium hover:text-primary transition-colors">Menu</Link>
-                <Link href="/orders" className="text-xl font-medium hover:text-primary transition-colors">My Orders</Link>
+                {!isAdminPage && (
+                  <>
+                    <Link href="/menu" className="text-xl font-medium hover:text-primary transition-colors">Menu</Link>
+                    <Link href="/orders" className="text-xl font-medium hover:text-primary transition-colors">My Orders</Link>
+                  </>
+                )}
+                {isAdminPage && (
+                  <Link href="/dashboard" className="text-xl font-medium hover:text-primary transition-colors">Dashboard</Link>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
@@ -53,23 +63,28 @@ export function Navbar() {
             <span className="sr-only">Toggle theme</span>
           </Button>
           
-          <Link href="/orders" className="hidden sm:block">
-            <Button variant="ghost" className="rounded-full font-medium">
-              My Orders
-            </Button>
-          </Link>
+          
+          {!isAdminPage && (
+            <>
+              <Link href="/orders" className="hidden sm:block">
+                <Button variant="ghost" className="rounded-full font-medium">
+                  My Orders
+                </Button>
+              </Link>
 
-          <Link href="/cart">
-            <Button variant="default" className="rounded-full gap-2 px-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
-              <ShoppingCart className="h-4 w-4" />
-              <span className="hidden sm:inline-block">Cart</span>
-              {totalItems > 0 && (
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-bold">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
-          </Link>
+              <Link href="/cart">
+                <Button variant="default" className="rounded-full gap-2 px-4 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5">
+                  <ShoppingCart className="h-4 w-4" />
+                  <span className="hidden sm:inline-block">Cart</span>
+                  {totalItems > 0 && (
+                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-bold">
+                      {totalItems}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
